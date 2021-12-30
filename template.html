@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.css" integrity="sha256-3jBdkj3eH4VZ53NLsfAZcK86du/IRLlMo8hIj+qNo/c=" crossorigin="anonymous">
+
+  <title>{% if current %}{{ current }} - Index File{% else %}Index File{% endif %}</title>
+</head>
+<body class="w-full">
+<header class="border-b py-4 bg-gray-100">
+  <div class="container mx-auto px-3">
+    <h2 class="text-2xl font-bold"><a href="/">Index File</a></h2>
+    <small class="text-sm">Small tool for serving files</small>
+  </div>
+</header>
+<main class="">
+  <div class="container mx-auto p-3 flex flex-col md:flex-row md:items-start">
+    <aside class="w-full md:w-1/5 md:mr-3">
+      {% if is_login %}
+      <div class="border">
+        <h3 class="px-2 py-1 border-b bg-gray-100">New Folder</h3>
+        <form class="p-2" action="/api/directory/" method="post">
+          <input type="text" name="path" value="{{ current }}" hidden>
+          <input class="w-full border mt-1 p-1" id="directory" name="directory" type="text" required>
+          <button class="w-full border mt-3 mb-1 p-1 bg-gray-100 hover:bg-gray-200" type="submit">Create</button>
+        </form>
+      </div>
+      <div class="border mt-3">
+        <h3 class="px-2 py-1 border-b bg-gray-100">New File</h3>
+        <form class="p-2" action="/api/file/" method="post" enctype="multipart/form-data">
+          <input type="text" name="path" value="{{ current }}" hidden>
+          <input class="w-full border mt-1 p-1" id="file" name="file" type="file" required>
+          <button class="w-full border mt-3 mb-1 p-1 bg-gray-100 hover:bg-gray-200" type="submit">Upload</button>
+        </form>
+      </div>
+      <div class="border mt-3">
+        <h3 class="px-2 py-1 border-b bg-gray-100">Remove File/Folder</h3>
+        <form class="p-2" action="/api/delete/" method="post">
+          <input type="text" name="path" value="{{ current }}" hidden>
+          <select class="w-full border mt-1 p-1" name="file" id="select" required>
+            <option value="">----------</option>
+            {% for file in file_list %}
+            <option value="{{ file.name }}">{{ file.name }}</option>
+            {% endfor %}
+          </select>
+          <button class="w-full border mt-3 mb-1 p-1 bg-gray-100 hover:bg-gray-200" type="submit">Remove</button>
+        </form>
+      </div>
+      {% endif %}
+
+      <div class="border{% if is_login %} mt-3{% endif %}">
+        <h3 class="px-2 py-1 border-b bg-gray-100">Admin</h3>
+        {% if is_login %}
+        <form class="p-2" action="/api/logout/" method="post">
+          <button class="w-full border mb-1 p-1 bg-gray-100 hover:bg-gray-200" type="submit">Logout</button>
+        </form>
+        {% else %}
+        <form class="p-2" action="/api/login/" method="post">
+          <label for="password">Password:</label>
+          <input class="w-full border mt-1 p-1" id="password" name="password" type="password" required>
+          <button class="w-full border mt-3 mb-1 p-1 bg-gray-100 hover:bg-gray-200" type="submit">Login</button>
+        </form>
+        {% endif %}
+      </div>
+    </aside>
+    <div class="w-full border mt-3 md:mt-0">
+      <h3 class="px-2 py-1 border-b bg-gray-100">
+        <a href="/">Homepage</a>
+        {% for part in parts %}
+        &nbsp;/&nbsp;<a href="{{ part.url }}">{{ part.name }}</a>
+        {% endfor %}
+      </h3>
+      <ul class="divide-y divide-dashed p-2">
+        {% if not file_list %}
+        <li class="p-1">Empty ...</li>
+        {% endif %}
+        {% for file in file_list %}
+        <li class="flex items-baseline py-1">
+          <a class="font-bold" href="/{{ file.path }}" {% if file.size %}target="_blank" {% endif %}>{{ file.name }}</a>
+          {% if file.size %}<span class="text-sm text-gray-500 ml-2">{{ file.size }}</span>{% endif %}
+          <span class="ml-auto">{{ file.modified }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</main>
+</body>
+</html>
