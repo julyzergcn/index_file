@@ -2,6 +2,7 @@
 ## command
 
     pip install index.py Jinja2 gunicorn uvicorn
+    python3 index_file.py
     gunicorn -k uvicorn.workers.UvicornWorker index_file:app
 
 

@@ -10,7 +10,7 @@ from indexpy import (
 from jinja2 import Template
 
 
-DEBUG = True
+USE_NGINX = False
 
 ROOT = Path('./www')
 ROOT.mkdir(exist_ok=True)
@@ -133,14 +133,13 @@ async def index():
         raise HTTPException(400)
 
     if real_path.is_file():
-        if DEBUG:
-            return FileResponse(real_path)
-        else:
+        if USE_NGINX:
             return HttpResponse(
                 headers={
                     'X-Accel-Redirect': quote(f'/path_/{path}'),
                 }
             )
+        return FileResponse(real_path)    
 
     file_list = []
     dir_list = []
@@ -183,3 +182,9 @@ async def index():
         context.update({'is_login': True})
 
     return HTMLResponse(TPL.render(**context))
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, interface="asgi3", port=5000, debug=True)
